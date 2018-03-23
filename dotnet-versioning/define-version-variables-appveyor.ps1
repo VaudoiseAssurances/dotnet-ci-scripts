@@ -24,13 +24,21 @@ $updatedVersion = & "$scriptsPath\DefineNextVersion.ps1" $version $packageName $
 
 # get the version suffix (ex: beta01) if any
 $separatorPosition = $updatedVersion.IndexOf("-") + 1 
+
+
+Add-AppveyorMessage -Message "assembly version detected: $updatedVersion" -Category Information 
+
+
 if ($separatorPosition -gt 0)
 {
     $suffix = $updatedVersion.Substring($separatorPosition)
+    Add-AppveyorMessage -Message "suffix detected: $suffix" -Category Information
+}
+else
+{
+    Add-AppveyorMessage -Message "No suffix detected. This is normal if the current branch ($branchName) is 'master' " -Category Information
 }
 
-# The following lines are appveyor-specific.
+
 Set-AppveyorBuildVariable "suffix" $suffix
 Set-AppveyorBuildVariable "version" $updatedVersion
-Add-AppveyorMessage -Message "assembly version detected: $updatedVersion" -Category Information 
-Add-AppveyorMessage -Message "suffix version detected: $suffix" -Category Information 
