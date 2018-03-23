@@ -36,6 +36,7 @@ if ($separatorPosition -gt 0)
 }
 else
 {
+    $suffix = ""
     Add-AppveyorMessage -Message "No suffix detected. This is normal if the current branch ($branchName) is 'master' " -Category Information
 }
 
