@@ -11,6 +11,13 @@ param (
 
 # Find setted version
 $version = & "$scriptsPath\GetVersionDotnetCore.ps1" $csprojPath
+
+if (!$version)
+{
+    Write-Host "failed to read assembly version in $csprojPath"
+    $host.SetShouldExit(1)
+}
+
 # Decide if the version should be changed
 $updatedVersion = & "$scriptsPath\DefineNextVersion.ps1" $version $packageName $branchName 'DummyParameterBecauseImSureThisIsUseless'
 
