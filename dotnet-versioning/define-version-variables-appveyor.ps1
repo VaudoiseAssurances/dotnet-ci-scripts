@@ -4,7 +4,7 @@ param (
 	[Parameter(Mandatory = $true)]
 	[string]$packageName,
 	[Parameter(Mandatory = $true)]
-	[string]$branchName,
+	[string]$branchName
 )
 
 # Find setted version
