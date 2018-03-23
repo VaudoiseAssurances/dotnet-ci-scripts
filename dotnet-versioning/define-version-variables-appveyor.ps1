@@ -15,7 +15,7 @@ $version = & "$scriptsPath\GetVersionDotnetCore.ps1" $csprojPath
 if (!$version)
 {
     Add-AppveyorMessage -Message "failed to read assembly version in $csprojPath" -Category Error -Details "Make sure the $csprojPath file contains a Project.PropertyGroup.AssemblyVersion node."
-    $host.SetShouldExit(1)
+    exit 1
 }
 
 # Decide if the version should be changed
