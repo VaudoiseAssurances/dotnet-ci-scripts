@@ -27,7 +27,7 @@ param (
 	[string]$repoNuGet
 )
 
-Write-Host "PSScriptRoot: " + $PSScriptRoot
+Write-Host "PSScriptRoot: $PSScriptRoot"
 
 # Get AssemblyInfo version
 $splittedVersion = Select-String -inputObject $version -Pattern '([0-9]*).([0-9]*).([0-9]*)(.*?)' | % { $_.Matches }
@@ -38,6 +38,8 @@ $splittedVersion_patch = $splittedVersion.Groups[3].Value
 # Get all available package versions
 $packageVersions = & "$PSScriptRoot\.nuget\NuGet.exe" list $packageName -prerelease -allversions # -source $repoNuGet 
 Write-Host $packageVersions
+
+# Warning : using the nuget.exe search will not yield results if it is not indexed. (it takes a few minutes).
 
 # Get the matching version
 $filteredVersions = $packageVersions | Select-String -Pattern "$($splittedVersion_major).$($splittedVersion_minor).$($splittedVersion_patch)-[bB]eta([0-9]*)" -AllMatches | % { $_.Matches }

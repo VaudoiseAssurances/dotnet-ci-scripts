@@ -12,6 +12,8 @@ param (
 # Find setted version
 $version = & "$scriptsPath\GetVersionDotnetCore.ps1" $csprojPath
 
+# TODO: Here : if the .csproj is malformed $version could be an array instead of a string, and throw an exception later. it could be worth making a check and write an error message in the build output.
+
 if (!$version)
 {
     # The following line is appveyor-specific.
