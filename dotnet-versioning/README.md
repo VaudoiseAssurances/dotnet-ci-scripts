@@ -20,3 +20,9 @@ This script updates the AssemblyVersion of all sub-AssemblyInfo's files
 
 ### SetNextVersion
 This script updates the AssemblyinformationVersion in the $assemblyInfoPath file.
+
+### define-version-variables-appveyor
+This script is focused on AppVeyor, and sets thw $suffix and $updatedVersion environment variables, in order to be used for the creation and publication of NuGet packages. In order to achieve this, the script makes use of other scripts in this repository.
+
+### dotnet-pack-optionalsuffix
+This script makes a safe call to ``dotnet pack $solutionPath --configuration $configuration --include-symbols --output "$outputPath" --no-build --version-suffix $suffix``. Contrary to calling ``dotnet pack`` directly, it will not fail if ``$suffix`` is not set. 
