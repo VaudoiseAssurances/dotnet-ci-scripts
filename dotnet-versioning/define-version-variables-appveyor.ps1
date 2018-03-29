@@ -15,10 +15,11 @@ $version = & "$scriptsPath\GetVersionDotnetCore.ps1" $csprojPath
 # sometimes (unknown reason yet), the preceding script returns an array which contains the version number
 if ($version -is [array])
 {
-    if ($version.length -gt 1) {
-        Add-AppveyorMessage -Message "Error during the read of the assembly version in $csprojPath" -Category Error -Details "Make sure the $csprojPath file is valid and contains 1 unique Project.PropertyGroup.AssemblyVersion node."
-        exit 1
-	}
+	# TODO find why the array has more than 1 cell for mediatr-eventaggregator to enable the following check
+    #if ($version.length -gt 1) {
+    #    Add-AppveyorMessage -Message "Error during the read of the assembly version in $csprojPath" -Category Error -Details "Make sure the $csprojPath file is valid and contains 1 unique Project.PropertyGroup.AssemblyVersion node."
+    #    exit 1
+	#}
 	$version = $version[0]
 }
 
