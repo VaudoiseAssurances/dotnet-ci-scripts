@@ -12,10 +12,13 @@ param (
 # Find setted version
 $version = & "$scriptsPath\GetVersionDotnetCore.ps1" $csprojPath
 
-# TODO: Here : if the .csproj is malformed $version could be an array instead of a string, and throw an exception later.
-# should we check and write an error message instead of retrieving the first cell ?
+# sometimes (unknown reason yet), the preceding script returns an array which contains the version number
 if ($version -is [array])
 {
+    if ($version.length -gt 1) {
+        Add-AppveyorMessage -Message "Error during the read of the assembly version in $csprojPath" -Category Error -Details "Make sure the $csprojPath file is valid and contains 1 unique Project.PropertyGroup.AssemblyVersion node."
+        exit 1
+	}
 	$version = $version[0]
 }
 
