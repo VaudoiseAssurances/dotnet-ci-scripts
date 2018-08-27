@@ -18,5 +18,17 @@ param (
 )
 
 [xml]$csprojFile = Get-Content -Path $csprojPath
+$versionInPropertyGroups = $csprojFile.Project.PropertyGroup.AssemblyVersion
+if ($versionInPropertyGroups -is [string])
+{
+    return $versionInPropertyGroups
+}
 
-return $csprojFile.Project.PropertyGroup.AssemblyVersion
+$filteredVersions = $versionInPropertyGroups | where {$_ -ne $null}
+if ($filteredVersions -is [string])
+{
+    return $filteredVersions
+}
+
+write-output “Could not find version in $csprojPath, Found $versionInPropertyGroups” 
+exit 1 
