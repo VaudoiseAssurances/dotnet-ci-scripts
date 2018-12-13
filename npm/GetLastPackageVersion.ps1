@@ -15,4 +15,3 @@ $packageInfo = (npm info $packageName -json) | ConvertFrom-Json
 $lastVersion = $packageInfo.versions[-1]
 
 return $lastVersion
- 
