@@ -11,8 +11,8 @@ param (
 	[string]$packageName
 )
 
-$json = (npm info $packageName -json) | ConvertFrom-Json
-$lastVersion = $json.versions[$json.versions.Length-1]
+$packageInfo = (npm info $packageName -json) | ConvertFrom-Json
+$lastVersion = $packageInfo.versions[-1]
 
 return $lastVersion
  
