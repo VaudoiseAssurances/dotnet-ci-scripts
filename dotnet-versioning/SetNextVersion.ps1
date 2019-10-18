@@ -24,7 +24,9 @@ param (
 	[Parameter(Mandatory = $true)]
 	[string]$branchName,
 	[Parameter(Mandatory = $true)]
-	[string]$repoNuGet
+	[string]$repoNuGet,
+	[Parameter(Mandatory = $false)]
+	[string]$propFileName
 )
 
 "PSScriptRoot:" + $PSScriptRoot
@@ -36,13 +38,13 @@ $assemblyInfoVersion_minor = $assemblyInfoVersion.Groups[2].Value
 $assemblyInfoVersion_patch = $assemblyInfoVersion.Groups[3].Value
 
 # Get all available package versions
-$packageVersions = & "$PSScriptRoot\.nuget\NuGet.exe" list $packageName -prerelease -source $repoNuGet -allversions
+$packageVersions = Find-Package $packageName -AllVersions -AllowPrereleaseVersions -Source $repoNuGet
 
 # Get the matching version
-$filteredVersions = $packageVersions | Select-String -Pattern "$($assemblyInfoVersion_major).$($assemblyInfoVersion_minor).$($assemblyInfoVersion_patch)-[bB]eta([0-9]*)" -AllMatches | % { $_.Matches }
+$filteredVersions = $packageVersions | Where-Object -property Version -Match "$($assemblyInfoVersion_major).$($assemblyInfoVersion_minor).$($assemblyInfoVersion_patch)-[bB]eta([0-9]*)"
 
 # Is there a final version already ?
-$finalVersion = $packageVersions | Select-String -Pattern "$($assemblyInfoVersion_major).$($assemblyInfoVersion_minor).$($assemblyInfoVersion_patch)(?!-[bB]eta([0-9]*))" -AllMatches | % { $_.Matches } | Sort-Object -Property Groups[1] -desc | Select-Object -first 1 | % { $_.Value }
+$finalVersion = $packageVersions | Where-Object -property Version -Match  "$($assemblyInfoVersion_major).$($assemblyInfoVersion_minor).$($assemblyInfoVersion_patch)(?!-[bB]eta([0-9]*))" | Select-Object -ExpandProperty Version -First 1
 
 # If NuGet already has a final version, then we can't do anything. Developers need to udpate their AssemblyInfo first
 if($finalVersion -eq $assemblyInfoVersion_major + "." + $assemblyInfoVersion_minor + "." + $assemblyInfoVersion_patch) 
@@ -64,7 +66,7 @@ else
 	else 
 	{
 	    # Get last version available
-	    $lastVersion = $filteredVersions | Sort-Object -Property Groups[1] -desc | Select-Object -first 1 | % { $_.Value }
+	    $lastVersion = $filteredVersions | Sort-Object -Property Version | Select-Object -ExpandProperty Version -Last 1
 	
 	    # Get next beta available
 	    $semanticVersion    = $lastVersion | Select-String -Pattern "([0-9]*).([0-9]*).([0-9]*)-[bB]eta([0-9]*)" | % { $_.Matches }
@@ -80,3 +82,27 @@ else
 
 # Replace AssemblyInfo.cs with the newer version ($nextVersion)
 [IO.File]::WriteAllLines($assemblyInfoPath, ((Get-Content $assemblyInfoPath) | ForEach-Object { $_ -replace 'AssemblyInformationalVersion\("([0-9]*).([0-9]*).([0-9]*)(.*?)"\)', "AssemblyInformationalVersion(""$nextVersion"")" }))
+
+# Inject in prop file
+if ($propFileName.Length -eq 0) {
+    $propFileName = 'release.props'
+}
+
+# Set assembly version
+$assemblyversion=  "$nextVersion.$((get-date).ToString("HHmmssff"))"
+
+# Write Assembly version on console
+"Assembly version : " + $assemblyversion
+
+# Build properties to inject into file
+$prop = "version=" + $nextVersion + "`r`n"
+$prop = $prop + "assemblyversion=" + $assemblyversion 
+
+# Create or update file
+if (!(Test-Path $propFileName)){
+    "Create file " + $propFileName
+    New-Item -Path . -Name $propFileName -Value $prop
+} 
+else {
+    Add-Content $propFileName $prop
+}
